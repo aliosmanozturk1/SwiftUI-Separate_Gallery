@@ -29,17 +29,14 @@ struct GalleryView: View {
                             ForEach(Array(photoManager.photos.enumerated()), id: \.element.id) { index, photo in
                                 ThumbnailView(photo: photo, photos: photoManager.photos, index: index)
                                     .onAppear {
+                                        // Optimize edilmiş thumbnail yükleme
                                         Task.detached(priority: .background) {
-                                            await withTaskGroup(of: Void.self) { group in
-                                                let start = index + 1
-                                                let end = await min(index + 6, photoManager.photos.count)
-                                                for i in start..<end {
-                                                    let nextPhawaitOto = await photoManager.photos[i]
-                                                    group.addTask {
-                                                        _ = await photoManager.loadThumbnail(for: nextPhawaitOto.fileName)
-                                                        await Task.yield()
-                                                    }
-                                                }
+                                            let start = index + 1
+                                            let end = await min(index + 3, photoManager.photos.count)
+                                            for i in start..<end {
+                                                let nextPhoto = await photoManager.photos[i]
+                                                await photoManager.loadThumbnail(for: nextPhoto.fileName)
+                                                await Task.yield()
                                             }
                                         }
                                     }
@@ -59,7 +56,7 @@ struct GalleryView: View {
                             .disabled(isLoading)
                             
                             Button(action: {
-                                // Camera action gelecek
+                                // Camera action
                             }) {
                                 Image(systemName: "camera")
                             }
@@ -111,4 +108,4 @@ struct GalleryView: View {
 
 #Preview {
     GalleryView()
-} 
+}
